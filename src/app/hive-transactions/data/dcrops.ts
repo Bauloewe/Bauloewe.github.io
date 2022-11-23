@@ -101,9 +101,8 @@ export class HiveTrxBuilderPlanter{
 
     plant(seed: string, amount: number, mode:Set<Rarity>, collection: AccountNftCollection, season: Season){
 
-        
         const lands = this.filterLand(collection.land_nft,mode);
-        const seeds = this.filterSeeds(collection.seed_nft.get(seed)!,season);
+        const seeds = this.filterSeeds(collection.seed_nft.get(seed)!,amount,season);
 
         return this.ploughFields(seeds, lands);
 
@@ -115,18 +114,21 @@ export class HiveTrxBuilderPlanter{
         const hive_trx: HiveTrxPlant = new HiveTrxPlant();
         const lands_sorted: Land[] = lands.sort((a, b) => (a.filledPlots > b.filledPlots ? -1 : 1));
 
+        let nft_count:number = 0;
+
         for(let land of lands_sorted){
             
             const landPlot: LandToPlant = <LandToPlant>{};
             landPlot.landID = land.id;
             landPlot.plant = [];
             let index: number = 0;
+            nft_count += 1;
             for(let plot of land.secondary.p){
 
                 if (plot.length == 0) {
                     let seed: Seed|undefined = seeds.pop();
-                    if(!seed) break;
-
+                    if(!seed || nft_count >=50) break;
+                    nft_count+=1;
                     const planterPlot =  <LandPlot>{};
                     planterPlot.seedID = seed.id;
                     planterPlot.plotNo = index;
@@ -136,7 +138,7 @@ export class HiveTrxBuilderPlanter{
             }
             hive_trx.payload.push(landPlot);
 
-            if (seeds.length == 0) break;
+            if (seeds.length == 0 || nft_count >=50) break;
 
 
           }
@@ -145,11 +147,11 @@ export class HiveTrxBuilderPlanter{
         
     }
 
-    private filterSeeds(seeds: Seed[],season: Season){
+    private filterSeeds(seeds: Seed[],amount: number,season: Season){
         let seeds_filtered: Seed[] = [];
         seeds.forEach((seed)=>{
             console.log(seed);
-            if(!seed.cooldown && seed.season.has(season.index)){
+            if(!seed.cooldown && seed.season.has(season.index) && seeds_filtered.length <= amount){
                 seeds_filtered.push(seed);
             }
         });
