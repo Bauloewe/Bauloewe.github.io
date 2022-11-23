@@ -1,0 +1,16 @@
+<div id="content-div">
+
+<mat-spinner style="margin:0 auto;" *ngIf="!collection"></mat-spinner>
+
+<ng-container *ngIf="collection">
+    <h1>Plant Away! <ng-container *ngIf="season">
+        <img src={{seasonImagePath}} alt={{season.name}}>
+    </ng-container></h1>
+    <mat-divider></mat-divider>
+
+    You own {{collection.seed_nft.get(cropName)?.length}} {{cropName}} seeds.
+    <br><br>
+
+    <button (click)="testButton()" mat-flat-button color="primary">Plant</button>
+</ng-container>
+</div>

@@ -1,1 +1,99 @@
-/* You can add global styles to this file, and also import other style files */
+
+// Custom Theming for Angular Material
+// For more information: https://material.angular.io/guide/theming
+@use '@angular/material' as mat;
+// Plus imports for other components in your app.
+
+// Include the common styles for Angular Material. We include this here so that you only
+// have to load a single css file for Angular Material in your app.
+// Be sure that you only ever include this mixin once!
+@include mat.core();
+
+
+
+$md-dcrops: (
+    50 : #e9f4e9,
+    100 : #c7e3c9,
+    200 : #a2d1a5,
+    300 : #7cbf81,
+    400 : #60b166,
+    500 : #44a34b,
+    600 : #3e9b44,
+    700 : #35913b,
+    800 : #2d8833,
+    900 : #1f7723,
+    A100 : #b4ffb8,
+    A200 : #81ff87,
+    A400 : #4eff56,
+    A700 : #35ff3e,
+    contrast: (
+        50 : #000000,
+        100 : #000000,
+        200 : #000000,
+        300 : #000000,
+        400 : #000000,
+        500 : #ffffff,
+        600 : #ffffff,
+        700 : #ffffff,
+        800 : #ffffff,
+        900 : #ffffff,
+        A100 : #000000,
+        A200 : #000000,
+        A400 : #000000,
+        A700 : #000000,
+    )
+);
+// Define the palettes for your theme using the Material Design palettes available in palette.scss
+// (imported above). For each palette, you can optionally specify a default, lighter, and darker
+// hue. Available color palettes: https://material.io/design/color/
+$dcropsBot-primary: mat.define-palette($md-dcrops);
+$dcropsBot-accent: mat.define-palette(mat.$pink-palette, A200, A100, A400);
+
+// The warn palette is optional (defaults to red).
+$dcropsBot-warn: mat.define-palette(mat.$red-palette);
+
+// Create the theme object. A theme consists of configurations for individual
+// theming systems such as "color" or "typography".
+$dcropsBot-theme: mat.define-light-theme((
+  color: (
+    primary: $dcropsBot-primary,
+    accent: $dcropsBot-accent,
+    warn: $dcropsBot-warn,
+  )
+));
+
+
+// Include theme styles for core and each component used in your app.
+// Alternatively, you can import and @include the theme mixins for each component
+// that you are using.
+@include mat.all-component-themes($dcropsBot-theme);
+
+@font-face {
+    font-family: "FredokaOne";
+    src: local("FredokaOne"), url(./assets/fonts/FredokaOne-Regular.ttf) format("truetype");
+}
+
+.mat-flat-button {
+    color: #ffff;
+    background-color: #44a34b;
+    border-color: #44a34b;
+}
+
+
+html, body { height: 100%; }
+body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; background-color: #c7e3c9;}
+h1{margin: 0}
+
+#content-div{
+    padding: 2.5%;
+    background-color: #ffff;
+    margin: 1%;
+}
+
+h1 {
+    font-family: FredokaOne , sans-serif !important;
+    -webkit-text-fill-color: white;
+    -webkit-text-stroke-color: black;
+    -webkit-text-stroke-width: 1.00px; 
+    -webkit-font-smoothing: antialiased;
+  }
