@@ -54,7 +54,7 @@ export class AccountNftCollection{
             const seed = <Seed>{};
 
             seed.id = id;
-            seed.cooldown = secondary.cd > Date.now() / 1000;
+            seed.cooldown = (1209600 + secondary.cd) > Date.now() / 1000;
             seed.season = new Set(primary.s);
             seed.rarity = <Rarity> nft_obj.rarity;
             seed.primary = primary;
