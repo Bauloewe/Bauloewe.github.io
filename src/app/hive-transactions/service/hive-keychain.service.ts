@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HiveKeychainResponse } from '../data/keychain';
+import { HiveKeychainResponse } from '../data/keychain.data';
 
 @Injectable({
   providedIn: 'root'
@@ -25,7 +25,7 @@ export class HiveKeychainService {
           if (response.success) {
             resolve(response);
           }else{
-            reject(response)
+            resolve(response)
           }
         });
       }, 300);

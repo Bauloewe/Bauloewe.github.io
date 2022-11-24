@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
 import {HttpClient} from '@angular/common/http';
-import { HiveEngineContractRequest, HiveEngineContractResponse, Result } from '../data/requests';
+import { HiveEngineContractRequest, HiveEngineContractResponse, Result } from '../data/requests.data';
 import { lastValueFrom } from 'rxjs';
-import { AccountNftCollection, Season } from '../data/dcrops';
+import { AccountNftCollection, Season } from '../data/dcrops.data';
 import { seedAndLand } from '../data/Constants';
 @Injectable({
   providedIn: 'root'
@@ -41,7 +41,7 @@ export class HiveEngineService {
     return season;
   }
 
-  public async getSeedsAndLand(user: string){
+  public async getSeedsAndLand(user: string, filter: boolean){
 
     let limit = 1000;
     let offset = 0
@@ -51,10 +51,10 @@ export class HiveEngineService {
     const result: AccountNftCollection = new AccountNftCollection();
     do{
       const request = this.buildSeedAndLandRequest(user,limit, offset);
-      const val = await this.postContract(request);
+      val = await this.postContract(request);
 
       val.result.forEach((element: Result) => {
-        result.addNft(element);
+        result.addNft(element, filter);
       });
       
       offset += limit;

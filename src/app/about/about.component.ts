@@ -1,7 +1,7 @@
 import { DOCUMENT } from '@angular/common';
 import { AfterContentInit, Component, Inject, OnInit } from '@angular/core';
 import { async } from '@angular/core/testing';
-import { HiveKeychainResponse } from '../hive-transactions/data/keychain';
+import { HiveKeychainResponse } from '../hive-transactions/data/keychain.data';
 
 @Component({
   selector: 'app-about',

@@ -1,6 +1,6 @@
 import { seed_nfts } from "./Constants";
-import { Properties, Result } from "./requests";
-import { HiveTrxPlant, LandPlot, LandToPlant } from "./transactions";
+import { Properties, Result } from "./requests.data";
+import { HiveTrxPlant, LandPlot, LandToPlant } from "./transactions.data";
 
 export interface Season{
     nft: string;
@@ -12,6 +12,7 @@ export interface Season{
 
 export interface Seed{
     id: number;
+    name: string;
     cooldown: boolean;
     rarity: Rarity;
     season: Set<number>;
@@ -40,7 +41,7 @@ export class AccountNftCollection{
     }
 
 
-    public addNft(nft: Result){
+    public addNft(nft: Result, filter: boolean){
         const props: Properties = nft.properties;
 
         const id = nft._id;
@@ -54,6 +55,7 @@ export class AccountNftCollection{
             const seed = <Seed>{};
 
             seed.id = id;
+            seed.name = props.name;
             seed.cooldown = (1209600 + secondary.cd) > Date.now() / 1000;
             seed.season = new Set(primary.s);
             seed.rarity = <Rarity> nft_obj.rarity;
@@ -63,7 +65,9 @@ export class AccountNftCollection{
             let seed_list:Seed[] = [];
             seed_list = this.seed_nft.has(props.name) ? this.seed_nft.get(props.name)! : [];
             seed_list.push(seed);
-            
+
+            if(filter && seed.cooldown) return;
+
             this.seed_nft.set(props.name, seed_list);
 
         }else{
@@ -83,6 +87,8 @@ export class AccountNftCollection{
             land.filledPlots = filledPlots;
             land.full = filledPlots == secondary.p.length;
 
+            if(filter && land.full) return;
+
             this.land_nft.push(land);
 
         }
@@ -97,24 +103,60 @@ export enum Rarity{
     EPIC = "Epic",
     LEGENDARY = "Legendary"
 }
+
 export class HiveTrxBuilderPlanter{
 
     plant(seed: string, amount: number, mode:Set<Rarity>, collection: AccountNftCollection, season: Season){
 
         const lands = this.filterLand(collection.land_nft,mode);
-        const seeds = this.filterSeeds(collection.seed_nft.get(seed)!,amount,season);
+        const seeds = this.filterSeeds(collection.seed_nft.get(seed)!,season);
+        const output : any = this.ploughFields(seeds, amount, lands);
 
-        return this.ploughFields(seeds, lands);
+        this.updateCollection(seed, seeds, output.map, collection);
+
+        return output.request;
+
 
     }
 
+    private updateCollection(seed: string, seeds: Seed[], lands: Map<Number,Land>, collection: AccountNftCollection){
+        collection.seed_nft.set(seed,seeds);
+        
+        for (const land of collection.land_nft){
+            if(lands.has(land.id)){
+                const mod_land = lands.get(land.id)!;
+                land.filledPlots = mod_land.filledPlots;
+                land.full = mod_land.secondary.p.length == mod_land.filledPlots;
+                land.secondary = mod_land.secondary;
+            }
+        }
 
-    private ploughFields(seeds: Seed[], lands: Land[]){
+    }
+    private compare(a: Land, b: Land){
+        let comp: number = 0;
+        const a_max = a.secondary.p.length
+        const b_max = b.secondary.p.length
+
+        let a_empty = a_max - a.filledPlots;
+        let b_empty = b_max - b.filledPlots;
+
+        a_empty += a_empty > 1 && a_empty < a_max ? Number(a.rarity)+1:0;
+        b_empty += b_empty > 1 && b_empty < b_max ? Number(b.rarity)+1:0;
+
+        comp =  a_empty > b_empty ? -1 : 1;
+
+        return comp;
+    }
+    private ploughFields(seeds: Seed[], amount: Number, lands: Land[]){
     
         const hive_trx: HiveTrxPlant = new HiveTrxPlant();
-        const lands_sorted: Land[] = lands.sort((a, b) => (a.filledPlots > b.filledPlots ? -1 : 1));
+
+        const lands_sorted: Land[] = lands.sort((a, b) => (this.compare(a,b)));
+        console.log(lands_sorted);
+        const land_map:Map<Number,Land> = new Map<Number,Land>();
 
         let nft_count:number = 0;
+        let seeds_planted = 0;
 
         for(let land of lands_sorted){
             
@@ -126,32 +168,41 @@ export class HiveTrxBuilderPlanter{
             for(let plot of land.secondary.p){
 
                 if (plot.length == 0) {
-                    let seed: Seed|undefined = seeds.pop();
-                    if(!seed || nft_count >=50) break;
+                    if(seeds.length == 0 || nft_count >=50 || seeds_planted >= amount) break;
+
+                    let seed: Seed = seeds.pop()!;
+
                     nft_count+=1;
+                    seeds_planted+= 1;
+
                     const planterPlot =  <LandPlot>{};
                     planterPlot.seedID = seed.id;
                     planterPlot.plotNo = index;
                     landPlot.plant.push(planterPlot);
+
+                    land.secondary.p[index] = seed.name;
+                    land.filledPlots += 1;
                 }
+                land_map.set(land.id,land);
                 index++;
+                
             }
+
             hive_trx.payload.push(landPlot);
 
-            if (seeds.length == 0 || nft_count >=50) break;
+            if (seeds.length == 0 || nft_count >=50 || seeds_planted >= amount) 
+                break;
 
 
           }
-
-          return hive_trx;
+          return {"request": hive_trx,"map":land_map};
         
     }
 
-    private filterSeeds(seeds: Seed[],amount: number,season: Season){
+    private filterSeeds(seeds: Seed[],season: Season){
         let seeds_filtered: Seed[] = [];
         seeds.forEach((seed)=>{
-            console.log(seed);
-            if(!seed.cooldown && seed.season.has(season.index) && seeds_filtered.length <= amount){
+            if(!seed.cooldown && seed.season.has(season.index)){
                 seeds_filtered.push(seed);
             }
         });

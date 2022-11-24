@@ -8,7 +8,43 @@
     </ng-container></h1>
     <mat-divider></mat-divider>
 
-    You can plant {{plantableSeeds}} {{cropName}} seeds.
+        <br><div><table>
+            <tbody>
+                <tr><td>Plots</td></tr>
+                <tr><td><div class="common_outer"><div class="common"></div></div> {{landCount[0].amount}}</td><td><div class="rare_outer"><div class="rare"></div></div> {{landCount[1].amount}}</td><td><div class="epic_outer"><div class="epic"></div></div> {{landCount[2].amount}}</td><td><div class="legendary_outer"><div class="legendary"></div></div> {{landCount[3].amount}}</td></tr>
+            </tbody>
+        </table>
+    </div>
+        <br>
+        <ng-container *ngIf="cropName">You can plant {{plantableSeeds}} {{cropName}} seeds in {{season.name | lowercase}}.
+            <br><br>
+        </ng-container>
+        
+        <mat-form-field appearance="outline">
+          <mat-label>Seed</mat-label>
+          <input matInput (ngModelChange)="updateCropName($event)"
+                 [value]="cropName"
+                 aria-label="Seed"
+                 name="Seed"
+                 [matAutocomplete]="auto"
+                 [formControl]="seedCtrl">
+          <mat-autocomplete #auto="matAutocomplete">
+            <mat-option *ngFor="let seed of filteredSeeds | async" [value]="seed.name">
+              <img src={{seed.img}}>
+              <small>{{seed.name}}</small> |
+              <small>#{{seed.number}}</small>
+            </mat-option>
+          </mat-autocomplete>
+        </mat-form-field>
+        <span> </span>
+        <mat-form-field appearance="outline">
+            <mat-label>Amount</mat-label>
+            <input matInput [(ngModel)]="cropNumber"
+               aria-label="Amount"
+               value="0"
+               name="Amount">
+        </mat-form-field>
+      
     <br><br>
 
     <button (click)="testButton()" mat-flat-button color="primary">Plant</button>

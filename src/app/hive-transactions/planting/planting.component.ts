@@ -2,10 +2,12 @@ import { Component, OnInit } from '@angular/core';
 import { HiveKeychainService } from '../service/hive-keychain.service';
 import {MatButtonModule} from "@angular/material/button";
 import { HiveEngineService } from '../service/hive-engine.service';
-import { AccountNftCollection, HiveTrxBuilderPlanter, Rarity, Season } from '../data/dcrops';
+import { AccountNftCollection, HiveTrxBuilderPlanter, Rarity, Season } from '../data/dcrops.data';
 import { ActivatedRoute } from '@angular/router';
-import { Subject, takeUntil } from 'rxjs';
-
+import { map, Observable, startWith, Subject, takeUntil } from 'rxjs';
+import { FormControl } from '@angular/forms';
+import { AutoCompSeed, LandCount } from '../data/ui.data';
+import { MatOptgroup } from '@angular/material/core';
 @Component({
   selector: 'app-planting',
   templateUrl: './planting.component.html',
@@ -13,6 +15,12 @@ import { Subject, takeUntil } from 'rxjs';
 })
 export class PlantingComponent implements OnInit {
 
+  seedCtrl = new FormControl('');
+  auto_comp! : AutoCompSeed[];
+  filteredSeeds!: Observable<AutoCompSeed[]>;
+
+  public landCount: LandCount[] = [];
+  public PlotRarity = Rarity;
   public season!: Season;
   public seasonImagePath!: string;
   public plantableSeeds: number = 0;
@@ -22,7 +30,7 @@ export class PlantingComponent implements OnInit {
 
   private user!: string;
   public cropName!: string;
-  private cropNumber!: number;
+  public cropNumber!: number;
   private plotRarity: Rarity[] = [];
   private rarityEnums = [Rarity.COMMON,Rarity.RARE,Rarity.EPIC, Rarity.LEGENDARY];
 
@@ -41,40 +49,102 @@ export class PlantingComponent implements OnInit {
         this.plotRarity.push(this.rarityEnums[Number(rarity)]);
       });
 
-
-
     });
-
-
 
     (async () =>{
       this.season = await this.hiveEngine.getSeason();
       this.seasonImagePath = "/assets/images/" + this.season.name.toLowerCase() +".png";
-      await this.loadCollection(this.user);
+      await this.loadCollection(this.user, true);
       this.calculatePlantableCrops();
+      this.filteredSeeds = this.seedCtrl.valueChanges.pipe(
+        startWith(''),
+        map(seed => (seed ? this._filterStates(seed) : this.auto_comp.slice())),
+      );
+
     })();
   }
 
-  private async loadCollection(user: string){
-    this.collection = await this.hiveEngine.getSeedsAndLand(user);
+  private _filterStates(value: string): AutoCompSeed[] {
+    const filterValue = value.toLowerCase();
+
+    return this.auto_comp.filter(seed => seed.name.toLowerCase().includes(filterValue));
   }
 
-  private async calculatePlantableCrops(){
-    this.plantableSeeds = 0;
-    this.collection.seed_nft.get(this.cropName)?.forEach(element => {
-        this.plantableSeeds += !element.cooldown && element.season.has(this.season.index) ? 1 : 0;
+  private async loadCollection(user: string, filter: boolean){
+    this.collection = await this.hiveEngine.getSeedsAndLand(user, filter);
+    this.calculatePlantableCrops();
+    this.countLandTypes();
+  }
+
+  private countLandTypes(){
+    const map = new Map<Rarity,number>();
+    map.set(Rarity.COMMON,0);
+    map.set(Rarity.RARE,0);
+    map.set(Rarity.EPIC,0);
+    map.set(Rarity.LEGENDARY,0);
+
+    this.collection.land_nft.forEach((land)=>{
+      let count = map.get(land.rarity)!;
+      if(!land.full){
+        count +=1;
+        map.set(land.rarity,count);
+      }
     });
+
+    this.landCount.push({rarity: Rarity.COMMON,amount: map.get(Rarity.COMMON)!});
+    this.landCount.push({rarity: Rarity.RARE,amount: map.get(Rarity.RARE)!});
+    this.landCount.push({rarity: Rarity.EPIC,amount: map.get(Rarity.EPIC)!});
+    this.landCount.push({rarity: Rarity.LEGENDARY,amount: map.get(Rarity.LEGENDARY)!});
+
+  }
+
+  private async calculatePlantableCrops(update_input: boolean=true){
+    if(this.collection.seed_nft.has(this.cropName)){
+      this.plantableSeeds = 0;
+      
+      this.collection.seed_nft.get(this.cropName)?.forEach(element => {
+          this.plantableSeeds += !element.cooldown && element.season.has(this.season.index) ? 1 : 0;
+      });
+    }
+    if(update_input){
+      this.auto_comp = [];
+
+      this.collection.seed_nft.forEach((value,key) => {
+        if(value[0].season.has(this.season.index)){
+          let seed = <AutoCompSeed>{};
+          seed.name = key;
+          seed.number = value.length;
+          seed.img = "/assets/images/" + key + ".png"
+          this.auto_comp.push(seed);
+        }
+      });
+    }
   }
 
   public async testButton(){
 
     const a = new HiveTrxBuilderPlanter();
-    const resp = a.plant(this.cropName,this.cropNumber,new Set(this.plotRarity),this.collection,this.season);
+    const request = a.plant(this.cropName,this.cropNumber,new Set(this.plotRarity),this.collection,this.season);
 
-    this.keychain.requestCustomJson(window, this.user,"dcrops","Active",resp,"Plants stuff");
+    const response = await this.keychain.requestCustomJson(window, this.user,"dcrops","Active",request,"Plants stuff");
 
-    this.loadCollection(this.user);
+    if(!response.success){
+      await this.loadCollection(this.user,true);
+    }
+    
     this.calculatePlantableCrops();
 
   }
+  
+  public updateCropName(event: string){
+
+    if(this.collection.seed_nft.has(event)){
+      this.cropName = event;
+      this.calculatePlantableCrops(false);
+    }
+
+  }
+
 }
+
+
