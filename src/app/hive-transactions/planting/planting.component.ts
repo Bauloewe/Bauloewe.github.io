@@ -19,7 +19,7 @@ export class PlantingComponent implements OnInit {
   auto_comp! : AutoCompSeed[];
   filteredSeeds!: Observable<AutoCompSeed[]>;
 
-  public landCount: LandCount[] = [];
+  public plotCount: LandCount[] = [];
   public PlotRarity = Rarity;
   public season!: Season;
   public seasonImagePath!: string;
@@ -86,15 +86,15 @@ export class PlantingComponent implements OnInit {
     this.collection.land_nft.forEach((land)=>{
       let count = map.get(land.rarity)!;
       if(!land.full){
-        count +=1;
+        count += land.secondary.p.length - land.filledPlots;
         map.set(land.rarity,count);
       }
     });
 
-    this.landCount.push({rarity: Rarity.COMMON,amount: map.get(Rarity.COMMON)!});
-    this.landCount.push({rarity: Rarity.RARE,amount: map.get(Rarity.RARE)!});
-    this.landCount.push({rarity: Rarity.EPIC,amount: map.get(Rarity.EPIC)!});
-    this.landCount.push({rarity: Rarity.LEGENDARY,amount: map.get(Rarity.LEGENDARY)!});
+    this.plotCount.push({rarity: Rarity.COMMON,amount: map.get(Rarity.COMMON)!});
+    this.plotCount.push({rarity: Rarity.RARE,amount: map.get(Rarity.RARE)!});
+    this.plotCount.push({rarity: Rarity.EPIC,amount: map.get(Rarity.EPIC)!});
+    this.plotCount.push({rarity: Rarity.LEGENDARY,amount: map.get(Rarity.LEGENDARY)!});
 
   }
 

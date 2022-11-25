@@ -36,7 +36,7 @@ p{
     height:20px; /* You can define it by % also */
     position:relative;
     border:1px solid transparent;
-    border-radius: 50%;
+    border-radius: 25%;
 }
 .common_outer{
     background-color: rgba(0, 128, 0, 0.5);
@@ -44,7 +44,7 @@ p{
     height:35px; /* of the container */
     position: relative;
     border:1px solid green;
-    border-radius: 50%;
+    border-radius: 25%;
 }
 
 
@@ -56,7 +56,7 @@ p{
     height:20px; /* You can define it by % also */
     position:relative;
     border:1px solid transparent;
-    border-radius: 50%;
+    border-radius: 25%;
 }
 .rare_outer{
     background-color: rgba(0, 0, 255, 0.5);
@@ -64,7 +64,7 @@ p{
     height:35px; /* of the container */
     position: relative;
     border:1px solid blue;
-    border-radius: 50%;
+    border-radius: 25%;
 }
 
 .epic {
@@ -75,7 +75,7 @@ p{
     height:20px; /* You can define it by % also */
     position:relative;
     border:1px solid transparent;
-    border-radius: 50%;
+    border-radius: 25%;
 }
 .epic_outer{
     background-color: rgba(137, 43, 226, 0.5);
@@ -83,7 +83,7 @@ p{
     height:35px; /* of the container */
     position: relative;
     border:1px solid blueviolet;
-    border-radius: 50%;
+    border-radius: 25%;
 }
 
 .legendary {
@@ -94,7 +94,7 @@ p{
     height:20px; /* You can define it by % also */
     position:relative;
     border:1px solid transparent;
-    border-radius: 50%;
+    border-radius: 25%;
 }
 .legendary_outer{
     background-color:rgba(218, 165, 32, 0.5);
@@ -102,7 +102,7 @@ p{
     height:35px; /* of the container */
     position: relative;
     border:1px solid goldenrod;
-    border-radius: 50%;
+    border-radius: 25%;
 }
 
 td 
@@ -110,8 +110,13 @@ td
     text-align: center;
 }
 
-.example-form-fields {
+.parent-element {
     display: flex;
-    align-items: flex-start;
+    width: 50%;
   }
-
+  
+  .child-element {
+    flex: 1;
+    border: 2px solid blueviolet;
+    margin: 10px;
+  }
