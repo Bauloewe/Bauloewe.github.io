@@ -3,29 +3,20 @@ img{
     height:50px
 }
 
-.mat-blue {
-    background-color: blue;
-    color: #fff;
-    
-}
-
-.mat-green {
-    background-color: green;
-    color: #fff;
-}
-
-.mat-purple {
-    background-color: blueviolet;
-    color: #fff;
-}
-
-.mat-gold {
-    background-color: goldenrod;
-    color: #fff;
-}
-
 p{
     display:inline-block;
+}
+
+.common.active {
+    background-color:green;
+    top: 20%; 
+    left:20%;
+    width:20px; /* You can define it by % also */
+    height:20px; /* You can define it by % also */
+    position:relative;
+    border:1px solid white;
+    border-radius: 30%;
+    color: white;
 }
 
 .common {
@@ -47,6 +38,17 @@ p{
     border-radius: 25%;
 }
 
+.rare.active {
+    background-color:blue;
+    top: 20%; 
+    left:20%;
+    width:20px; /* You can define it by % also */
+    height:20px; /* You can define it by % also */
+    position:relative;
+    border:1px solid white;
+    border-radius: 25%;
+    color: white;
+}
 
 .rare {
     background-color:blue;
@@ -66,6 +68,17 @@ p{
     border:1px solid blue;
     border-radius: 25%;
 }
+.epic.active {
+    background-color:blueviolet;
+    top: 20%; 
+    left:20%;
+    width:20px; /* You can define it by % also */
+    height:20px; /* You can define it by % also */
+    position:relative;
+    border:1px solid white;
+    border-radius: 25%;
+    color: white;
+}
 
 .epic {
     background-color:blueviolet;
@@ -84,6 +97,18 @@ p{
     position: relative;
     border:1px solid blueviolet;
     border-radius: 25%;
+}
+
+.legendary.active {
+    background-color:goldenrod;
+    top: 20%; 
+    left:20%;
+    width:20px; /* You can define it by % also */
+    height:20px; /* You can define it by % also */
+    position:relative;
+    border:1px solid white;
+    border-radius: 25%;
+    color: white;
 }
 
 .legendary {

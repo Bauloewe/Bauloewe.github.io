@@ -12,10 +12,10 @@
             <tbody>
                 <th><th colspan="5">Empty land plots</th>
                 <tr><td></td>
-                    <td><div class="common_outer"><div class="common"></div></div> {{plotCount[0].amount}}</td>
-                    <td><div class="rare_outer"><div class="rare"></div></div> {{plotCount[1].amount}}</td>
-                    <td><div class="epic_outer"><div class="epic"></div></div> {{plotCount[2].amount}}</td>
-                    <td><div class="legendary_outer"><div class="legendary"></div></div> {{plotCount[3].amount}}</td>
+                    <td><div (click)="toggleRarity(0)" class="common_outer"><div class="common" [class.active]="selctLand[0]"><ng-container *ngIf="selctLand[0]">&#xd7;</ng-container></div></div> {{plotCount[0].amount}}</td>
+                    <td><div (click)="toggleRarity(1)" class="rare_outer"><div class="rare" [class.active]="selctLand[1]"><ng-container *ngIf="selctLand[1]">&#xd7;</ng-container></div></div> {{plotCount[1].amount}}</td>
+                    <td><div (click)="toggleRarity(2)" class="epic_outer"><div class="epic" [class.active]="selctLand[2]"><ng-container *ngIf="selctLand[2]">&#xd7;</ng-container></div></div> {{plotCount[2].amount}}</td>
+                    <td><div (click)="toggleRarity(3)" class="legendary_outer"><div class="legendary" [class.active]="selctLand[3]"><ng-container *ngIf="selctLand[3]">&#xd7;</ng-container></div></div> {{plotCount[3].amount}}</td>
                 </tr>
             </tbody>
         </table>
@@ -24,7 +24,13 @@
         <ng-container *ngIf="cropName">You can plant {{plantableSeeds}} {{cropName}} seeds in {{season.name | lowercase}}.
             <br><br>
         </ng-container>
-        
+        <mat-form-field appearance="outline">
+            <mat-label>User</mat-label>
+            <input matInput [(ngModel)]="user"
+               aria-label="User"
+               value="0"
+               name="User">
+        </mat-form-field>
         <mat-form-field appearance="outline">
           <mat-label>Seed</mat-label>
           <input matInput (ngModelChange)="updateCropName($event)"
@@ -41,7 +47,6 @@
             </mat-option>
           </mat-autocomplete>
         </mat-form-field>
-        <span> </span>
         <mat-form-field appearance="outline">
             <mat-label>Amount</mat-label>
             <input matInput [(ngModel)]="cropNumber"

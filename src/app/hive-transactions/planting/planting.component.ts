@@ -7,7 +7,7 @@ import { ActivatedRoute } from '@angular/router';
 import { map, Observable, startWith, Subject, takeUntil } from 'rxjs';
 import { FormControl } from '@angular/forms';
 import { AutoCompSeed, LandCount } from '../data/ui.data';
-import { MatOptgroup } from '@angular/material/core';
+
 @Component({
   selector: 'app-planting',
   templateUrl: './planting.component.html',
@@ -21,6 +21,8 @@ export class PlantingComponent implements OnInit {
 
   public plotCount: LandCount[] = [];
   public PlotRarity = Rarity;
+  public selctLand: boolean[] = [false, false, false, false];
+
   public season!: Season;
   public seasonImagePath!: string;
   public plantableSeeds: number = 0;
@@ -28,10 +30,10 @@ export class PlantingComponent implements OnInit {
 
   private destroy$: Subject<void> = new Subject();
 
-  private user!: string;
+  public user!: string;
   public cropName!: string;
   public cropNumber!: number;
-  private plotRarity: Rarity[] = [];
+  private plotRarity: Set<Rarity> = new Set<Rarity>();
   private rarityEnums = [Rarity.COMMON,Rarity.RARE,Rarity.EPIC, Rarity.LEGENDARY];
 
   constructor(private route: ActivatedRoute, private keychain: HiveKeychainService, private hiveEngine: HiveEngineService){}
@@ -46,7 +48,8 @@ export class PlantingComponent implements OnInit {
       const raritiesCs = params.get('plotRarities') ? <string>params.get('plotRarities') : "";
 
       raritiesCs.split(",").forEach((rarity)=>{
-        this.plotRarity.push(this.rarityEnums[Number(rarity)]);
+        this.selctLand[Number(rarity)] = true;
+        this.plotRarity.add(this.rarityEnums[Number(rarity)]);
       });
 
     });
@@ -124,7 +127,7 @@ export class PlantingComponent implements OnInit {
   public async testButton(){
 
     const a = new HiveTrxBuilderPlanter();
-    const request = a.plant(this.cropName,this.cropNumber,new Set(this.plotRarity),this.collection,this.season);
+    const request = a.plant(this.cropName,this.cropNumber,this.plotRarity,this.collection,this.season);
 
     const response = await this.keychain.requestCustomJson(window, this.user,"dcrops","Active",request,"Plants stuff");
 
@@ -142,7 +145,17 @@ export class PlantingComponent implements OnInit {
       this.cropName = event;
       this.calculatePlantableCrops(false);
     }
+  }
 
+  public toggleRarity(rarity: number){
+      const selectedLand: boolean = this.selctLand[rarity];
+      this.selctLand[rarity] = !selectedLand;
+      if(!selectedLand){
+        this.plotRarity.add(this.rarityEnums[Number(rarity)]);
+      }else{
+        this.plotRarity.delete(this.rarityEnums[Number(rarity)]);
+      }
+      console.log(this.plotRarity)
   }
 
 }
